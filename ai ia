@@ -1,0 +1,261 @@
+P-1
+# Paths to the GloVe file and output Word2Vec file 
+glove_input_file = "/content/glove.6B.100d.txt" # Path to GloVe file 
+word2vec_output_file = "/content/glove.6B.100d.word2vec.txt" # Output file in Word2Vec format 
+# Convert GloVe format to Word2Vec format 
+glove2word2vec(glove_input_file, word2vec_output_file) 
+# Load the converted Word2Vec model 
+model = KeyedVectors.load_word2vec_format(word2vec_output_file, binary=False) 
+# Test the loaded model 
+print(model.most_similar("king"))
+Example 1: Find Similar Words 
+similar_to_mysore = model.similar_by_vector(model['mysore'], topn=5) 
+print(f"Words similar to 'mysore': {similar_to_mysore}")
+Example 2: Gender Analogy (king - man + woman = queen) 
+# Perform vector arithmetic 
+result_vector_1 = model['actor'] - model['man'] + model['woman'] 
+result_1 = model.similar_by_vector(result_vector_1, topn=1) 
+print(f"'actor - man + woman' = {result_1}")
+Example 3: Country-City Relationship (India - Delhi + Bangalore) 
+result_vector_2 = model['india'] - model['delhi'] + model['washington'] 
+result_2 = model.similar_by_vector(result_vector_2, topn=3)
+Perform Arithmetic Operations 
+scaled_vector = model['hotel'] * 2 # Scales the 'king' vector by a factor of 2 
+result_2 = model.similar_by_vector(scaled_vector, topn=3) 
+result_2
+Example 2: Normalizing Vectors 
+import numpy as np 
+normalized_vector = model['fish'] / np.linalg.norm(model['fish']) 
+result_2 = model.similar_by_vector(normalized_vector, topn=3) 
+result_2
+Example 3: Averaging Vectors 
+average_vector = (model['king'] + model['woman'] + model['man']) / 3 
+result_2 = model.similar_by_vector(average_vector, topn=3) 
+result_2
+Model Comparision 
+glove_input_file = "/content/glove.6B.50d.txt" # Path to GloVe file 
+word2vec_output_file = "/content/glove.6B.50d.word2vec.txt" # Output file in Word2Vec format 
+glove2word2vec(glove_input_file, word2vec_output_file) 
+model_50d = KeyedVectors.load_word2vec_format(word2vec_output_file, binary=False) 
+glove_input_file = "/content/glove.6B.100d.txt" # Path to GloVe file 
+word2vec_output_file = "/content/glove.6B.100d.word2vec.txt" # Output file in Word2Vec format 
+glove2word2vec(glove_input_file, word2vec_output_file) 
+model_100d = KeyedVectors.load_word2vec_format(word2vec_output_file, binary=False)
+Calculate similarity between two words 
+word1 = "hospital" 
+word2 = "doctor" 
+similarity_50d = model_50d.similarity(word1, word2) 
+similarity_100d = model_100d.similarity(word1, word2) 
+print(f"Similarity (50d) between '{word1}' and '{word2}': {similarity_50d:.4f}") 
+print(f"Similarity (100d) between '{word1}' and '{word2}': {similarity_100d:.4f}")
+Calculate distance between two words 
+distance_50d = model_50d.distance(word1, word2) 
+distance_100d = model_100d.distance(word1, word2) 
+print(f"Distance (50d) between '{word1}' and '{word2}': {distance_50d:.4f}") 
+print(f"Distance (100d) between '{word1}' and '{word2}': {distance_100d:.4f}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+P-2
+model_100d = KeyedVectors.load_word2vec_format("/content/glove.6B.100d.word2vec.txt", binary=False,limit=500000) 
+words = ['football', 'soccer', 'basketball', 'tennis','engineer','information', 'baseball', 'coach', 'goal', 'player', 'referee', 'team'] 
+word_vectors = np.array([model_100d[word] for word in words]) 
+pca = PCA(n_components=2) 
+pca_result = pca.fit_transform(word_vectors) 
+# Plotting the words in 2D space 
+plt.figure(figsize=(10, 8))
+for i, word in enumerate(words): 
+plt.scatter(pca_result[i, 0], pca_result[i, 1]) 
+plt.text(pca_result[i, 0] + 0.02, pca_result[i, 1], word, fontsize=12) 
+plt.title("PCA Visualization of Sports-related Word Embeddings (100d)") 
+plt.xlabel("PCA Dimension 1") 
+plt.ylabel("PCA Dimension 2") 
+plt.show() 
+def get_similar_words(word, model, topn=5): 
+similar_words = model.similar_by_word(word, topn=topn) 
+return similar_words 
+Example: Get 5 words similar to "football" 
+similar_words_football = get_similar_words('football', model_100d, topn=5) 
+print(f"Words similar to 'football': {similar_words_football}")
+Select the words you want to print embeddings for 
+words_to_print = ['football', 'soccer'] 
+for word in words_to_print: 
+if word in model_100d: 
+print(f"Vector embedding for '{word}':\n{model_100d[word]}\n") 
+else: 
+print(f"Word '{word}' not found in the embeddings model.")
+
+
+
+
+P-3
+
+ legal_corpus = [ Write any 6 sentence ]
+legal_corpus = [ Same 6 sentence ]
+# Preprocess the corpus 
+tokenized_corpus = [simple_preprocess(sentence) for sentence in legal_corpus] 
+
+legal_word2vec = Word2Vec( 
+sentences=tokenized_corpus, 
+vector_size=50, 
+window=3, 
+min_count=1, 
+sg=1, 
+epochs=100 
+) 
+
+legal_word2vec.save("legal_word2vec.model")
+
+word = "lawyer" 
+if word in legal_word2vec.wv: 
+print(f"Vector embedding for '{word}':\n{legal_word2vec.wv[word]}\n") 
+else: 
+print(f"Word '{word}' not found in the Word2Vec model.")
+words_to_visualize = ["court", "plaintiff", "defendant", "agreement", "lawyer", "evidence", "contract", "settlement", "jury", "damages"] 
+word_vectors = [legal_word2vec.wv[word] for word in words_to_visualize]
+# Dimensionality reduction 
+pca = PCA(n_components=2) 
+reduced_vectors = pca.fit_transform(word_vectors) 
+reduced_vectors
+# Dimensionality reduction 
+pca = PCA(n_components=2) 
+reduced_vectors = pca.fit_transform(word_vectors) 
+reduced_vectors
+# Find similar words 
+similar_words = legal_word2vec.wv.most_similar("lawyer", topn=5) 
+print(f"Words similar to 'lawyer': {similar_words}") 
+
+
+enhanced_corpus = [ Repeat those 6 sentence ]
+
+# Preprocess the corpus 
+tokenized_corpus = [simple_preprocess(sentence) for sentence in enhanced_corpus] 
+tokenized_corpus
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+P-4
+
+ # Paths to the GloVe file and output Word2Vec file 
+glove_input_file = "/content/glove.6B.100d.txt" # Path to GloVe file 
+word2vec_output_file = "/content/glove.6B.100d.word2vec.txt" # Output file in Word2Vec format 
+# Convert GloVe format to Word2Vec format 
+glove2word2vec(glove_input_file, word2vec_output_file) 
+# Load the converted Word2Vec model 
+model = KeyedVectors.load_word2vec_format(word2vec_output_file, binary=False) 
+# Test the loaded model 
+print(model.most_similar("king"))
+
+ # Define the original medical prompt 
+original_prompt = "Explain the importance of vaccinations in healthcare." 
+# Define key terms extracted from the original prompt 
+key_terms = ["vaccinations", "healthcare"] 
+# Initialize an empty list to store similar terms 
+similar_terms = []
+# Loop through each key term to find similar words 
+for term in key_terms: 
+if term in model.key_to_index: 
+similar_terms.extend({word for word, _ in model.most_similar(term, topn=3)}) 
+# Enrich the original prompt with the retrieved similar terms 
+if similar_terms: 
+# If similar terms were found, create an enriched prompt by appending 
+# "Consider aspects like: " followed by a comma-separated string of similar terms. 
+enriched_prompt = f"{original_prompt} Consider aspects like: {', '.join(similar_terms)}." 
+else: 
+# If no similar terms were found, the enriched prompt is the same as the original prompt. 
+enriched_prompt = original_prompt 
+# Output the original and enriched prompts 
+print("Original Prompt:", original_prompt) 
+print("Enriched Prompt:", enriched_prompt) 
+import getpass 
+import os 
+GOOGLE_API_KEY= os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter your Google AI API key: ")
+llm = ChatGoogleGenerativeAI( 
+model="gemini-2.0-flash-exp", 
+temperature=0, 
+api_key=GOOGLE_API_KEY, 
+max_tokens=256, 
+timeout=None, 
+max_retries=2, 
+# other params... 
+) 
+llm.invoke("Hi")
+
+print(llm.invoke(enriched_prompt).content)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+P-5
+
+ # Load a pretrained SentenceTransformer model 
+model = SentenceTransformer('all-MiniLM-L6-v2') 
+# Define an expanded finance-related corpus 
+corpus = [    Any 7 sentence   ]
+# Encode the corpus into embeddings 
+corpus_embeddings = model.encode(corpus, convert_to_tensor=True) 
+corpus_embeddings
+# Function to generate a story using contextual embeddings 
+def generate_paragraph(seed_word, corpus, corpus_embeddings, model, top_n=5): 
+# Encode the seed word as a sentence 
+seed_sentence = f"Tell me more about {seed_word} in finance." 
+seed_embedding = model.encode(seed_sentence, convert_to_tensor=True) 
+# Find the most similar sentences in the corpus to the seed sentence 
+similarities = util.pytorch_cos_sim(seed_embedding, corpus_embeddings)[0] 
+top_results = similarities.topk(top_n) 
+print('top_results:',top_results) 
+# Construct a more coherent story using the most similar sentences 
+story = f"The topic of '{seed_word}' is crucial in the finance industry. " 
+for idx in top_results.indices: 
+similar_sentence = corpus[idx] 
+story += f"{similar_sentence} " 
+story += f"These concepts highlight the importance of {seed_word} in understanding financial markets and investment strategies."
+# Example usage 
+seed_word = "bonds" 
+story = generate_paragraph(seed_word, corpus, corpus_embeddings, model, top_n=5) 
+print(story)
+ 	 	
+
